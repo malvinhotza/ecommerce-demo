@@ -1,0 +1,12 @@
+import express from "express";
+import dotenv from "dotenv";
+dotenv.config();
+
+import authRoutes from "./routes/authRoutes.js";
+
+const app = express();
+const PORT = process.config.PORT || 5000;
+
+app.use("/api/auth", authRoutes);
+
+app.listen(PORT, () => `Listening on PORT = ${PORT}`);
