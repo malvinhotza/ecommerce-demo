@@ -28,7 +28,7 @@ export const signup = async (req, res) => {
 
     const user = await User.create({ name, email, password });
 
-    const {access_token, refresh_token} = await user.generateTokens(user._id);
+    const {access_token, refresh_token} = generateTokens(user._id);
 
     res.status(201).json({ user, message: "User created successfully"});
     } catch (error) {
