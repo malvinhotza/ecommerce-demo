@@ -61,17 +61,36 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    res.send("Sign up route called");
+    try {
+        const {email, password} = req.body;
+        const user = await User.findOne({ email });
+
+        if(user && (await user.comparePassword(password))) {
+            const {access_token, refresh_token} = generateTokens(user._id);
+            await storeRefreshToken(user._id, refresh_token);
+            setCookies(res, access_token, refresh_token);
+
+            res.json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            });
+        } else {
+			res.status(400).json({ message: "Invalid email or password" });
+		}
+    } catch (error) {
+        console.log("Error in login controller", error.message);
+        res.status(500).json({message: error.message});
+    }
 };
 
 export const logout = async (req, res) => {
     try {
         const refreshToken = req.cookies.refreshToken;
-        console.log(refreshToken);
+
         if(refreshToken) {
-            console.log(refreshToken);
             const decoded = jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET);
-            console.log(decoded);
             await redis.del(`refresh_token:${decoded.userId}`);
         }
 
